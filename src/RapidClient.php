@@ -8,20 +8,25 @@ class RapidClient
 {
     private $endpoint;
     private $token;
-    private $format;
-    /** @var Client */
-    private $client;
+    private $format = 'json';
 
     /**
-     * @param string $domain
+     * @param string $url
      * @param string $token
      * @param string $version
+     */
+    public function __construct($url, $token, $version = 'v1')
+    {
+        $url = rtrim($url, '/');
+        $this->endpoint = sprintf('%s/api/%s/', $url, $version);
+        $this->token = $token;
+    }
+
+    /**
      * @param string $format
      */
-    public function __construct($domain, $token, $version = 'v1', $format = 'json')
+    public function setFormat($format)
     {
-        $this->endpoint = sprintf('https://%s/api/%s/', $domain, $version);
-        $this->token = $token;
         $this->format = $format;
     }
 

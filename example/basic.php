@@ -3,7 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Survos\Rapidpro\RapidClient;
 
-$client = new RapidClient('textit.in', '<token>');
+$client = new RapidClient('https://textit.in', '<token>');
 
 // Create new campaign
 $groups = $client->get('groups', ['name' => 'Survey Audience']);
