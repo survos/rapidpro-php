@@ -67,10 +67,9 @@ class RapidClient
     {
         if (!in_array($response->getStatusCode(), $expectedCodes)) {
             $data = $this->parseResponse($response);
-            $message = is_array($data) ? json_encode($data) : 'Unknown error';
+            $message = isset($data['detail']) ? $data['detail'] : json_encode($data);
             throw new RapidException($message);
         }
-
     }
 
     /**
