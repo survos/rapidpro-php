@@ -2,6 +2,7 @@
 namespace Survos\Rapidpro;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 
 class RapidClient
@@ -42,6 +43,16 @@ class RapidClient
         ]);
     }
 
+    protected function request($method, $uri, array $options = [])
+    {
+        try {
+            $guzzle = $this->getGuzzle();
+            return $guzzle->request($method, $uri, $options);
+        } catch (ConnectException $e) {
+            throw new RapidException('Connection error', 0, $e);
+        }
+    }
+
     /**
      * @param ResponseInterface $response
      * @return array
@@ -80,9 +91,8 @@ class RapidClient
      */
     public function get($resource, array $params = [])
     {
-        $guzzle = $this->getGuzzle();
         $resource = $resource.'.'.$this->format;
-        $response = $guzzle->get($resource, ['query' => $params]);
+        $response = $this->request('GET', $resource, ['query' => $params]);
         $this->assertResponse($response, [200]);
         return $this->parseResponse($response);
     }
@@ -95,9 +105,8 @@ class RapidClient
      */
     public function delete($resource, $id)
     {
-        $guzzle = $this->getGuzzle();
         $resource = $resource.'.'.$this->format;
-        $response = $guzzle->delete($resource.'/'.$id);
+        $response = $this->request('DELETE', $resource);
         $this->assertResponse($response, [204]);
         return true;
     }
@@ -110,9 +119,8 @@ class RapidClient
      */
     public function post($resource, array $data)
     {
-        $guzzle = $this->getGuzzle();
         $resource = $resource.'.'.$this->format;
-        $response = $guzzle->post($resource, ['form_params' => $data]);
+        $response = $this->request('POST', $resource, ['form_params' => $data]);
         $this->assertResponse($response, [200, 201]);
         return $this->parseResponse($response);
     }
