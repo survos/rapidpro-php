@@ -6,9 +6,9 @@ Live api docs and token https://rapidpro.io/api/v1/explorer/
 
 ## Register user
 ```php
-use Survos\Rapidpro\RapidClient;
+use Survos\Rapidpro\RapidproClient;
 
-$client = new RapidClient('https://textit.in', '<token>');
+$client = new RapidproClient('https://textit.in', '<token>');
 
 // Create new campaign
 $groups = $client->get('groups', ['name' => 'Survey Audience']);

@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\ResponseInterface;
 
-class RapidClient
+class RapidproClient
 {
     private $endpoint;
     private $token;
@@ -49,21 +49,21 @@ class RapidClient
             $guzzle = $this->getGuzzle();
             return $guzzle->request($method, $uri, $options);
         } catch (ConnectException $e) {
-            throw new RapidException('Connection error', 0, $e);
+            throw new RapidproException('Connection error', 0, $e);
         }
     }
 
     /**
      * @param ResponseInterface $response
      * @return array
-     * @throws RapidException
+     * @throws RapidproException
      */
     protected function parseResponse($response)
     {
         $content = $response->getBody()->getContents();
         $data = json_decode($content, true);
         if (!is_array($data)) {
-            throw new RapidException("Bad data in server response: ".substr($response->getBody(),0,200));
+            throw new RapidproException("Bad data in server response: ".substr($response->getBody(),0,200));
         }
         return $data;
     }
@@ -72,14 +72,14 @@ class RapidClient
     /**
      * @param ResponseInterface $response
      * @param array $expectedCodes
-     * @throws RapidException
+     * @throws RapidproException
      */
     protected function assertResponse($response, array $expectedCodes = [200])
     {
         if (!in_array($response->getStatusCode(), $expectedCodes)) {
             $data = $this->parseResponse($response);
             $message = isset($data['detail']) ? $data['detail'] : json_encode($data);
-            throw new RapidException($message);
+            throw new RapidproException($message);
         }
     }
 
@@ -87,7 +87,7 @@ class RapidClient
      * @param string $resource
      * @param array $params
      * @return array
-     * @throws RapidException
+     * @throws RapidproException
      */
     public function get($resource, array $params = [])
     {
@@ -101,7 +101,7 @@ class RapidClient
      * @param string $resource
      * @param int $id
      * @return bool
-     * @throws RapidException
+     * @throws RapidproException
      */
     public function delete($resource, $id)
     {
@@ -115,7 +115,7 @@ class RapidClient
      * @param string $resource
      * @param array $data
      * @return array
-     * @throws RapidException
+     * @throws RapidproException
      */
     public function post($resource, array $data)
     {
