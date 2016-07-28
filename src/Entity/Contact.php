@@ -37,6 +37,24 @@ class Contact
     private $groups;
 
     /**
+     * Get email or tel, e.g: mailto, tel
+     * @param string $urnKey
+     * @return string|null
+     */
+    public function getUrn($urnKey)
+    {
+        if (is_array($this->urns)) {
+            foreach ($this->urns as $urn) {
+                list($key, $value) = explode(':', $urn);
+                if ($urnKey === $key) {
+                    return $value;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return string
      */
     public function getUuid()
