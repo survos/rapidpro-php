@@ -1,7 +1,8 @@
 {
   "name": "survos/rapidpro-php",
   "require": {
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "~6.0",
+    "symfony/serializer": "*"
   },
   "minimum-stability": "dev",
   "autoload": {

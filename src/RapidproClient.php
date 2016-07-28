@@ -1,127 +1,80 @@
 <?php
 namespace Survos\Rapidpro;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
-use Psr\Http\Message\ResponseInterface;
+use Survos\Rapidpro\Mapper\ContactMapper;
+use Survos\Rapidpro\Mapper\FlowMapper;
+use Survos\Rapidpro\Mapper\WebhookMapper;
+use Symfony\Component\Serializer\Serializer;
 
+/**
+ * RapidPro API v1
+ * https://rapidpro.io/api/v1
+ */
 class RapidproClient
 {
-    private $endpoint;
-    private $token;
-    private $format = 'json';
+    /** @var Gateway */
+    private $gateway;
 
-    /**
-     * @param string $url
-     * @param string $token
-     * @param string $version
-     */
-    public function __construct($url, $token, $version = 'v1')
+    /** @var Serializer */
+    private $serializer;
+
+    public function __construct(Gateway $gateway, Serializer $serializer)
     {
-        $url = rtrim($url, '/');
-        $this->endpoint = sprintf('%s/api/%s/', $url, $version);
-        $this->token = $token;
+        $this->gateway = $gateway;
+        $this->serializer = $serializer;
     }
 
     /**
-     * @param string $format
+     * @return Gateway
      */
-    public function setFormat($format)
+    public function getGateway()
     {
-        $this->format = $format;
+        return $this->gateway;
     }
+
+    /** @var WebhookMapper */
+    private $webhookMapper;
 
     /**
-     * @return Client
+     * https://rapidpro.io/webhooks/webhook/
+     * @return WebhookMapper
      */
-    protected function getGuzzle()
+    public function webhooks()
     {
-        return new Client([
-            'base_uri' => $this->endpoint,
-            'headers' => ['Authorization' => 'Token '.$this->token],
-            'http_errors' => false,
-        ]);
-    }
-
-    protected function request($method, $uri, array $options = [])
-    {
-        try {
-            $guzzle = $this->getGuzzle();
-            return $guzzle->request($method, $uri, $options);
-        } catch (ConnectException $e) {
-            throw new RapidproException('Connection error', 0, $e);
+        if (!$this->webhookMapper) {
+            $this->webhookMapper = new WebhookMapper($this->serializer);
         }
+        return $this->webhookMapper;
     }
 
-    /**
-     * @param ResponseInterface $response
-     * @return array
-     * @throws RapidproException
+    /** @var ContactMapper */
+    private $contactMapper;
+
+    /**   
+     * https://rapidpro.io/api/v1/contacts
+     * @return ContactMapper
      */
-    protected function parseResponse($response)
+    public function contacts()
     {
-        $content = $response->getBody()->getContents();
-        $data = json_decode($content, true);
-        if (!is_array($data)) {
-            throw new RapidproException("Bad data in server response: ".substr($response->getBody(),0,200));
+        if (!$this->contactMapper) {
+            $this->contactMapper = new ContactMapper($this->gateway, $this->serializer);
         }
-        return $data;
+        return $this->contactMapper;
     }
 
+    /** @var FlowMapper */
+    private $flowMapper;
 
-    /**
-     * @param ResponseInterface $response
-     * @param array $expectedCodes
-     * @throws RapidproException
+    /**   
+     * https://rapidpro.io/api/v1/flows
+     * @return FlowMapper
      */
-    protected function assertResponse($response, array $expectedCodes = [200])
+    public function flows()
     {
-        if (!in_array($response->getStatusCode(), $expectedCodes)) {
-            $data = $this->parseResponse($response);
-            $message = isset($data['detail']) ? $data['detail'] : json_encode($data);
-            throw new RapidproException($message);
+        if (!$this->flowMapper) {
+            $this->flowMapper = new FlowMapper($this->gateway, $this->serializer);
         }
+        return $this->flowMapper;
     }
 
-    /**
-     * @param string $resource
-     * @param array $params
-     * @return array
-     * @throws RapidproException
-     */
-    public function get($resource, array $params = [])
-    {
-        $resource = $resource.'.'.$this->format;
-        $response = $this->request('GET', $resource, ['query' => $params]);
-        $this->assertResponse($response, [200]);
-        return $this->parseResponse($response);
-    }
-
-    /**
-     * @param string $resource
-     * @param int $id
-     * @return bool
-     * @throws RapidproException
-     */
-    public function delete($resource, $id)
-    {
-        $resource = $resource.'.'.$this->format;
-        $response = $this->request('DELETE', $resource);
-        $this->assertResponse($response, [204]);
-        return true;
-    }
-
-    /**
-     * @param string $resource
-     * @param array $data
-     * @return array
-     * @throws RapidproException
-     */
-    public function post($resource, array $data)
-    {
-        $resource = $resource.'.'.$this->format;
-        $response = $this->request('POST', $resource, ['form_params' => $data]);
-        $this->assertResponse($response, [200, 201]);
-        return $this->parseResponse($response);
-    }
 }
