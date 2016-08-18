@@ -24,7 +24,7 @@ class Flow
     /** @var int */
     private $completed_runs;
 
-    /** @var array */
+    /** @var array|null */
     private $participants;
 
     /** @var array */
