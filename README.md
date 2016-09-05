@@ -4,6 +4,22 @@ Api docs https://rapidpro.io/api/v1
 
 Live api docs and token https://rapidpro.io/api/v1/explorer/
 
+## Installation
+Add the following to your composer.json
+
+```json
+    "require": {
+        "survos/rapidpro-php": "^0.1.0"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git@github.com:Survos/rapidpro-php"
+        },
+    ]
+```
+And then launch `composer update`
+
 ## Initialize client
 ```php
 use Survos\Rapidpro\RapidproClient;
